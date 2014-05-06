@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_dependency 'fastercsv', '~> 1.5'
-  s.add_dependency 'tzinfo', '~> 1.1.0'
+  s.add_dependency 'tzinfo', '~> 0.3.29'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'minitest'
