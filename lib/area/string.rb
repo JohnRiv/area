@@ -78,10 +78,11 @@ class String
   #   #=> "-5"
   #
   # Returns a String representation of the GMT offset.
-  def to_gmt_offset
+  def to_gmt_offset(options = {})
     if Area.zip_or_territory?(self.to_s)
+      options[:use_dst] = true if options[:use_dst].nil?
       row = Area.zip_codes.find {|row| row[2] != nil and (row[2].upcase == self.to_s.upcase or row[0] == self.to_s) }
-      row[5] if row
+      apply_dst(row[5], row[6], options[:use_dst]) if row
     end
   end
 
@@ -161,4 +162,13 @@ class String
     end
   end
 
+  private
+  def apply_dst(offset, dst, use_dst)
+    # Daylight savings starts from Eastern time in US
+    if use_dst && TZInfo::Timezone.get('US/Eastern').current_period.dst?
+      (offset.to_i + dst.to_i).to_s
+    else
+      offset
+    end
+  end
 end

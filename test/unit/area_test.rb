@@ -22,7 +22,7 @@ class TestInteger < MiniTest::Unit::TestCase
   end
 
   def test_that_it_converts_zip_code_int_to_gmt_offset
-    assert_equal "-5", 11211.to_gmt_offset
+    assert_equal "-5", 11211.to_gmt_offset(:use_dst => false)
   end
 
   def test_that_it_converts_zip_code_int_daylight_savings_time_observance
@@ -83,7 +83,7 @@ class TestString < MiniTest::Unit::TestCase
   end
 
   def test_that_it_converts_to_offset
-    assert_equal "-5", "ny".to_gmt_offset
+    assert_equal "-5", "ny".to_gmt_offset(:use_dst => false)
   end
 
   def test_that_it_converts_daylight_savings_time_observance
@@ -120,7 +120,7 @@ class TestString < MiniTest::Unit::TestCase
   end
 
   def test_that_it_converts_zip_code_to_gmt_offset
-    assert_equal "-5", "11211".to_gmt_offset
+    assert_equal "-5", "11211".to_gmt_offset(:use_dst => false)
   end
 
   # Benchmarks
@@ -202,7 +202,7 @@ class TestArray < MiniTest::Unit::TestCase
   end
 
   def test_that_it_converts_latlon_to_gmt_offset
-    assert_equal "-5", ["40.71209", "-73.95427"].to_gmt_offset
+    assert_equal "-5", ["40.71209", "-73.95427"].to_gmt_offset(:use_dst => false)
   end
 
   def test_that_it_converts_latlon_to_daylight_savings_time_observance

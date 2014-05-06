@@ -5,6 +5,7 @@ else
   require 'faster_csv'
 end
 
+require 'tzinfo'
 require 'area/array'
 require 'area/integer'
 require 'area/string'
