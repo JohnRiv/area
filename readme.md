@@ -11,10 +11,13 @@ Hi. This gem allows you to perform the following conversions:
 * A zipcode to just a lat
 * A zipcode to just a lon
 * A zipcode to its GMT offset
+* A zipcode to its time zone
 * A state to its GMT offset
+* A state to its time zone
 * A lat/lon pair to a region
 * A lat/lon pair to its GMT offset
 * A lat/lon pair to its zip code
+* A lat/lon pair to its time zone
 
 Area uses public domain data and does not rely on any external services (the internets). Usage is meant to be more lightweight than the Geocoder gem.
 
@@ -83,6 +86,16 @@ In your gemfile: `gem 'area'`
 "NY".observes_dst? #=> true # by state
 ```
 
+#### Get the time zone of a zipcode
+```` ruby
+"11211".to_time_zone #=> "America/New_York"
+```
+
+#### Get the time zone of a state
+```` ruby
+"NY".to_time_zone #=> "America/New_York" # by state
+```
+
 #### Convert a lat/lon pair to a zipcode
 ```` ruby
 [40.71209, -73.95427].to_zip #=> "11211"
@@ -101,6 +114,11 @@ In your gemfile: `gem 'area'`
 #### Determine daylight savings time observance for a lat/lon pair
 ```` ruby
 [40.71209, -73.95427].observes_dst? #=> true
+```
+
+#### Get the time zone for a lat/lon pair
+```` ruby
+[40.71209, -73.95427].to_time_zone #=> "America/New_York"
 ```
 
 ## Testing and Contributing and Stuff
