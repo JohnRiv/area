@@ -31,7 +31,7 @@ class String
       row = Area.area_codes.find {|row| row.first == self.to_s }
       return row.last if row
     elsif self.to_s.length == 5
-      if row = Area.zip_codes.find {|row| row.first == self.to_s }
+      if row = find_area_by_zip
         if row.first == self.to_s
           if options[:city]
             return row[1]
@@ -81,7 +81,7 @@ class String
   def to_gmt_offset(options = {})
     if Area.zip_or_territory?(self.to_s)
       options[:use_dst] = true if options[:use_dst].nil?
-      row = Area.zip_codes.find {|row| row[2] != nil and (row[2].upcase == self.to_s.upcase or row[0] == self.to_s) }
+      row = find_area_by_zip_or_territory
       apply_dst(row[5], row[6], options[:use_dst]) if row
     end
   end
@@ -97,7 +97,7 @@ class String
   # Returns a String representation of the daylight savings time observance.
   def to_dst
     if Area.zip_or_territory?(self.to_s)
-      row = Area.zip_codes.find {|row| row[2] != nil and (row[2].upcase == self.to_s.upcase or row[0] == self.to_s) }
+      row = find_area_by_zip_or_territory
       row[6] if row
     end
   end
@@ -114,6 +114,21 @@ class String
     to_dst == "1"
   end
 
+  # Public: Convert a zipcode to its time zone.
+  #
+  # Examples
+  #
+  #   "11211".to_time_zone
+  #   #=> "America/New_York"
+  #
+  # Returns a String representation of the time zone.
+  def to_time_zone
+    if Area.zip_or_territory?(self.to_s)
+      row = find_area_by_zip_or_territory
+      row[7] if row
+    end
+  end
+
 
   # Public: Convert a zipcode to its latitude and longitude.
   #
@@ -125,7 +140,7 @@ class String
   # Returns a String representation of the lat/lon pair.
   def to_latlon
     if Area.zip?(self)
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[3] + ', ' + row[4] if row
     end
   end
@@ -141,7 +156,7 @@ class String
   # Returns a String representation of the latitude.
   def to_lat
     if Area.zip?(self)
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[3] if row
     end
   end
@@ -157,16 +172,29 @@ class String
   # Returns a String representation of the longitude.
   def to_lon
     if Area.zip?(self)
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[4] if row
     end
   end
 
   private
+  def find_area_by_zip
+    Area.zip_codes.find {|row| row.first == self.to_s }
+  end
+
+  def find_area_by_zip_or_territory
+    Area.zip_codes.find {|row| row[2] != nil and (row[2].upcase == self.to_s.upcase or row[0] == self.to_s) }
+  end
+
   def apply_dst(offset, dst, use_dst)
     # Daylight savings starts from Eastern time in US
-    if use_dst && TZInfo::Timezone.get('US/Eastern').current_period.dst?
-      (offset.to_i + dst.to_i).to_s
+    if use_dst
+      tz = to_time_zone
+      if tz && TZInfo::Timezone.get(tz).current_period.dst?
+        (offset.to_i + dst.to_i).to_s
+      else
+        offset
+      end
     else
       offset
     end

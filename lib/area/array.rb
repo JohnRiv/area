@@ -64,7 +64,7 @@ class Array
   # Returns a String representation of the GMT offset.
   def to_gmt_offset(options = {})
     options[:use_dst] = true if options[:use_dst].nil?
-    row = Area.zip_codes.find {|row| row[3] == self[0].to_s and row[4] == self[1].to_s }
+    row = find_area
     apply_dst(row[5], row[6], options[:use_dst]) if row
   end
 
@@ -78,7 +78,7 @@ class Array
   #
   # Returns a String representation of daylight savings time observance.
   def to_dst
-    row = Area.zip_codes.find {|row| row[3] == self[0].to_s and row[4] == self[1].to_s }
+    row = find_area
     row[6] if row
   end
 
@@ -94,11 +94,33 @@ class Array
     to_dst == "1"
   end
 
+  # Public: Convert a lat/lon pair to its time zone.
+  #
+  # Examples
+  #
+  #   [40.71209, -73.95427].to_time_zone
+  #   #=> "America/New_York"
+  #
+  # Returns a String representation of the time zone.
+  def to_time_zone
+    row = find_area
+    row[7] if row
+  end
+
   private
+  def find_area
+    Area.zip_codes.find {|row| row[3] == self[0].to_s and row[4] == self[1].to_s }
+  end
+
   def apply_dst(offset, dst, use_dst)
     # Daylight savings starts from Eastern time in US
-    if use_dst && TZInfo::Timezone.get('US/Eastern').current_period.dst?
-      (offset.to_i + dst.to_i).to_s
+    if use_dst
+      tz = to_time_zone
+      if tz && TZInfo::Timezone.get(tz).current_period.dst?
+        (offset.to_i + dst.to_i).to_s
+      else
+        offset
+      end
     else
       offset
     end

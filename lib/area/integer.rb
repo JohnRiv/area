@@ -28,7 +28,7 @@ class Integer
   def to_latlon
     if Area.zip?(self)
       warn "[DEPRECATION] using `to_latlon` with an integer representation of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[3] + ', ' + row[4] if row
     end
   end
@@ -45,7 +45,7 @@ class Integer
   def to_lat
     if Area.zip?(self)
       warn "[DEPRECATION] using `to_lat` with an integer representation of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[3] if row
     end
   end
@@ -62,7 +62,7 @@ class Integer
   def to_lon
     if Area.zip?(self)
       warn "[DEPRECATION] using `to_lon` with an integer representaion of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[4] if row
     end
   end
@@ -80,7 +80,7 @@ class Integer
     if Area.zip?(self)
       warn "[DEPRECATION] using `to_gmt` with an integer representaion of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
       options[:use_dst] = true if options[:use_dst].nil?
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       apply_dst(row[5], row[6], options[:use_dst]) if row
     end
   end
@@ -97,7 +97,7 @@ class Integer
   def to_dst
     if Area.zip?(self)
       warn "[DEPRECATION] using `to_dst` with an integer representaion of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
-      row = Area.zip_codes.find {|row| row.first == self.to_s }
+      row = find_area_by_zip
       row[6] if row
     end
   end
@@ -114,11 +114,36 @@ class Integer
     to_dst == "1"
   end
 
+  # Public: Convert a zipcode to its time zone.
+  #
+  # Examples
+  #
+  #   11211.to_time_zone
+  #   #=> "America/New_York"
+  #
+  # Returns a String representation of the time zone.
+  def to_time_zone
+    if Area.zip?(self)
+      warn "[DEPRECATION] using `to_time_zone` with an integer representaion of a zipcode is deprecated and will be removed in future versions. Please use a string instead."
+      row = find_area_by_zip
+      row[7] if row
+    end
+  end
+
   private
+  def find_area_by_zip
+    Area.zip_codes.find {|row| row.first == self.to_s }
+  end
+
   def apply_dst(offset, dst, use_dst)
     # Daylight savings starts from Eastern time in US
-    if use_dst && TZInfo::Timezone.get('US/Eastern').current_period.dst?
-      (offset.to_i + dst.to_i).to_s
+    if use_dst
+      tz = to_time_zone
+      if tz && TZInfo::Timezone.get(tz).current_period.dst?
+        (offset.to_i + dst.to_i).to_s
+      else
+        offset
+      end
     else
       offset
     end
