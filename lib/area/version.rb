@@ -1,3 +1,3 @@
 module Area
-  VERSION = "0.11.0.charliehan"
+  VERSION = "0.11.0.johnriv"
 end
